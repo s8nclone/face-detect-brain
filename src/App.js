@@ -7,6 +7,15 @@ import Rank from './components/rank/Rank';
 import './App.css';
 import bgimage from './bgimage.png';
 
+const PAT = 'ba052aa66f304dadbf83c64e745f4459';
+    // Specify the correct user_id/app_id pairings
+    // Since you're making inferences outside your app's scope
+    const USER_ID = 'clarifai';       
+    const APP_ID = 'main';
+    // Change these to whatever model and image URL you want to use
+    const MODEL_ID = 'face-detection';
+    const MODEL_VERSION_ID = '6dc7e46bc9124c5c8824be4822abe105';    
+    const IMAGE_URL = 'https://samples.clarifai.com/metro-north.jpg';
 
 class App extends Component {
   constructor () {
@@ -23,40 +32,42 @@ class App extends Component {
 
   onButtonSubmit = () => {
     console.log('click')
+    // this.setState({IMAGE_URL: this.state.input})
+    // In this section, we set the user authentication, user and app ID, model details, and the URL
+    // of the image we want as an input.
     
-  const raw = JSON.stringify({
-    "user_app_id": {
-      "user_id": "s8nclone",
-      "app_id": "my-first-application"
-    },
-    "inputs": [
-        {
-            "data": {
-                "image": {
-                    "url": {IMAGE_URL: this.state.input}
+    const raw = JSON.stringify({
+        "user_app_id": {
+            "user_id": USER_ID,
+            "app_id": APP_ID
+        },
+        "inputs": [
+            {
+                "data": {
+                    "image": {
+                        "url": IMAGE_URL
+                    }
                 }
             }
-        }
-    ]
-  });
+        ]
+    });
 
-  const requestOptions = {
-      method: 'POST',
-      headers: {
-          'Accept': 'application/json',
-          'Authorization': 'Key 8b63a591a71747b2b066b521e8d5bcfd'
-      },
-      body: raw
-  };
+    const requestOptions = {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Authorization': 'Key ' + PAT
+        },
+        body: raw
+    };
+    // NOTE: MODEL_VERSION_ID is optional, you can also call prediction with the MODEL_ID only
+    // https://api.clarifai.com/v2/models/{YOUR_MODEL_ID}/outputs
+    // this will default to the latest version_id
 
-  // NOTE: MODEL_VERSION_ID is optional, you can also call prediction with the MODEL_ID only
-  // https://api.clarifai.com/v2/models/{YOUR_MODEL_ID}/outputs
-  // this will default to the latest version_id
-
-  fetch(`https://api.clarifai.com/v2/models/face-detection/versions/6dc7e46bc9124c5c8824be4822abe105/outputs`, requestOptions)
-      .then(response => response.text())
-      .then(result => console.log(result))
-      .catch(error => console.log('error', error));
+    fetch("https://api.clarifai.com/v2/models/" + MODEL_ID + "/versions/" + MODEL_VERSION_ID + "/outputs", requestOptions)
+        .then(response => response.text())
+        .then(result => console.log(result))
+        .catch(error => console.log('error', error));
     
   }
 
