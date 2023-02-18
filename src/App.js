@@ -32,7 +32,7 @@ class App extends Component {
 
   onButtonSubmit = () => {
     console.log('click')
-    // this.setState({IMAGE_URL: this.state.input})
+    this.setState({IMAGE_URL: this.state.input})
     // In this section, we set the user authentication, user and app ID, model details, and the URL
     // of the image we want as an input.
     
