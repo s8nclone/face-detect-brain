@@ -8,22 +8,42 @@ import './App.css';
 import bgimage from './bgimage.png';
 
 const PAT = 'ba052aa66f304dadbf83c64e745f4459';
-    // Specify the correct user_id/app_id pairings
-    // Since you're making inferences outside your app's scope
-    const USER_ID = 'clarifai';       
-    const APP_ID = 'main';
-    // Change these to whatever model and image URL you want to use
-    const MODEL_ID = 'face-detection';
-    const MODEL_VERSION_ID = '6dc7e46bc9124c5c8824be4822abe105';    
-    const IMAGE_URL = 'https://samples.clarifai.com/metro-north.jpg';
+// Specify the correct user_id/app_id pairings
+// Since you're making inferences outside your app's scope
+const USER_ID = 'clarifai';       
+const APP_ID = 'main';
+// Change these to whatever model and image URL you want to use
+const MODEL_ID = 'face-detection';
+const MODEL_VERSION_ID = '6dc7e46bc9124c5c8824be4822abe105';    
+const IMAGE_URL = 'https://samples.clarifai.com/metro-north.jpg';
 
 class App extends Component {
   constructor () {
     super();
     this.state = {
       input: '',
-      IMAGE_URL: ''
+      IMAGE_URL: '',
+      box: {}
     }
+  }
+
+  calculateFaceLocation = (data) => {
+    const clarifaiFace = data.outputs[0].data.regions[0].region_info.bounding_box;
+    const image = document.getElementById('inputimage');
+    const width = Number(image.width);
+    const height = Number(image.height);
+    console.log(width, height)
+    return {
+      leftCol : clarifaiFace.left_col * width,
+      topRow : clarifaiFace.top_row * height,
+      rightCol : width - (clarifaiFace.right_col * width),
+      bottomRow : height - (clarifaiFace.bottom_row * height)
+    }
+  }
+
+  displayFaceDetectBox = (box) => {
+    console.log(box)
+    this.setState({box: box})
   }
 
   onInputChange = (e) => {
@@ -66,7 +86,10 @@ class App extends Component {
 
     fetch("https://api.clarifai.com/v2/models/" + MODEL_ID + "/versions/" + MODEL_VERSION_ID + "/outputs", requestOptions)
         .then(response => response.text())
-        .then(result => console.log(result))
+        .then(result => {
+          const parsed = JSON.parse(result)
+          this.displayFaceDetectBox(this.calculateFaceLocation(parsed))
+        })
         .catch(error => console.log('error', error));
     
   }
@@ -87,7 +110,7 @@ class App extends Component {
         <Logo />
         <Rank />
         <ImageLinkForm onInputChange={this.onInputChange} onButtonSubmit={this.onButtonSubmit}/>
-        <FaceDetection IMAGE_URL={this.state.IMAGE_URL}/>
+        <FaceDetection box={this.state.box} IMAGE_URL={this.state.IMAGE_URL}/>
       </div>
     );
   }
