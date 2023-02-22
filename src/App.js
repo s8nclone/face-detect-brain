@@ -1,4 +1,6 @@
 import React, { Component } from 'react';
+import Signin from './components/signin/Signin';
+import Register from './components/register/Register';
 import Navigation from './components/navigation/Navigation';
 import Logo from './components/logo/Logo';
 import ImageLinkForm from './components/imageLink/ImageLinkForm';
@@ -23,7 +25,9 @@ class App extends Component {
     this.state = {
       input: '',
       IMAGE_URL: '',
-      box: {}
+      box: {},
+      route: 'signin',
+      isSignedIn: false
     }
   }
 
@@ -94,23 +98,43 @@ class App extends Component {
     
   }
 
+  onRouteChange = (route) => {
+    if (route === 'signout') {
+      this.setState({isSignedIn: false})
+    } else if (route === 'home') {
+    this.setState({isSignedIn: true})
+    } 
+    this.setState({route: route});
+  }
+
   render () {
+    const { isSignedIn, IMAGE_URL, route, box } = this.state;
     const myStyle={
       backgroundImage: `url(${bgimage})`,
       height:'70vh',
       marginTop:'0px',
-      fontSize:'50px',
+      fontSize:'30px',
       backgroundSize: 'cover',
       backgroundRepeat: 'no-repeat',
     };
 
     return (
       <div className="App" style={myStyle}>
-        <Navigation />
-        <Logo />
-        <Rank />
-        <ImageLinkForm onInputChange={this.onInputChange} onButtonSubmit={this.onButtonSubmit}/>
-        <FaceDetection box={this.state.box} IMAGE_URL={this.state.IMAGE_URL}/>
+        <Navigation isSignedIn={isSignedIn} onRouteChange={this.onRouteChange} />
+        { route === 'home'
+          ? <div>
+              <Logo />
+              <Rank />
+              <ImageLinkForm onInputChange={this.onInputChange} onButtonSubmit={this.onButtonSubmit}/>
+              <FaceDetection IMAGE_URL={IMAGE_URL} box={box}  />
+            </div>
+            
+          : (
+            this.state.route === 'signin'
+            ? <Signin onRouteChange={this.onRouteChange} />
+            : <Register onRouteChange={this.onRouteChange} />
+          )
+        }
       </div>
     );
   }
